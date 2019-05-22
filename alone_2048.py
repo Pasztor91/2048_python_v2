@@ -2,7 +2,7 @@ import time
 from app import app, db, database_2048
 from app.models import Game_obj
 from game import *
-from flask import request, render_template, jsonify
+from flask import request, render_template, jsonify, send_file
 from datetime import datetime, timedelta
 
 
@@ -55,6 +55,11 @@ def play_the_game():
 
 @app.route('/api/high_scores')
 def games():
+    interval = []
+    now = datetime.now()
+    print(now)
+    result = Game_obj.query.filter(Game_obj.expires_at > now)
+    print(result[0].expires_at)
     scores = database_2048.get_high_scores_from_db()
     return jsonify(scores)
 
@@ -87,4 +92,15 @@ def new_game():
 #     msg = "Saved!"
 #     return msg
 
+def download(path):
+    return send_file(path, as_attachment=True)
 
+
+@app.route('/download_scores')
+def download_scores():
+    return download('../scores.db')
+
+
+@app.route('/download_db')
+def download_db():
+    return download('database.db')
