@@ -47,6 +47,9 @@ def play_the_game():
             return game_dict
     game_data = {"board": board, "c_score": c_score, "uId": uId, "game_over": True}
     game_dict = jsonify(game_data)
+    u_name = "test"
+    score = c_score
+    database_2048.save_to_scores_db(u_name, score)
     return game_dict
 
 
@@ -56,8 +59,10 @@ def games():
     return jsonify(scores)
 
 
-@app.route('/api/new_game')
+@app.route('/api/new_game', methods=['POST'])
 def new_game():
+    resp = request.get_json()
+    team_name = resp['team_name']
     now = datetime.now()
     expires_at = now + timedelta(hours=3)
     b = Game(board=None, c_score=0)
@@ -65,7 +70,7 @@ def new_game():
     b.add_number()
     board = b.x
     c_score = b.c_score
-    game_obj = Game_obj(uId=uId, c_score=c_score, board=board, expires_at=expires_at)
+    game_obj = Game_obj(team_name=team_name, uId=uId, c_score=c_score, board=board, expires_at=expires_at)
     game_data = {"board": board, "c_score": c_score, "uId": uId}
     game_dict = jsonify(game_data)
     db.session.add(game_obj)
@@ -73,11 +78,13 @@ def new_game():
     return game_dict
 
 
-@app.route('/save_user_highscore', methods=['POST', 'GET'])
-def save_user_highscore():
-    resp = request.get_json()
-    u_name = resp['u_name']
-    c_score = resp['c_score']
-    database_2048.save_to_scores_db(u_name, c_score)
-    msg = "Saved!"
-    return msg
+# @app.route('/save_user_highscore', methods=['POST', 'GET'])
+# def save_user_highscore():
+#     resp = request.get_json()
+#     u_name = resp['u_name']
+#     c_score = resp['c_score']
+#     database_2048.save_to_scores_db(u_name, c_score)
+#     msg = "Saved!"
+#     return msg
+
+
